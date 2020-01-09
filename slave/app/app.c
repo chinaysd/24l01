@@ -1,9 +1,9 @@
 #include "app.h"
 
 TIMEOUT_PARA TimeOut_Para[2];
-uint8_t data_receive_buf[10];
-u8 rx_buf[10]; // 接收数据变量,数据一次最大只能发32个字节
-u8 tx_buf[10];
+// uint8_t data_receive_buf[10];
+// u8 rx_buf[10]; // 接收数据变量,数据一次最大只能发32个字节
+// u8 tx_buf[10];
 
 void Debug_Cfg(uint8_t *u_buf)
 {
@@ -78,16 +78,17 @@ void App_Init(void)
     //接收模式
     RX_Mode();
 }
-
+u8 Mode = 0;                       //模式标志设置为0 接收端
+u8 tmp_buf_Tx[32], tmp_buf_Rx[32]; //发送接收缓冲数组
 void App_Handle(void)
 {
+#if 0
     if (NRF24L01_RxPacket(rx_buf) == 0) //一旦接收到信息,则显示出来.
     {
         // printf("\r\n接收到数据为:%s", rx_buf);
         Debug_Cfg("=========================success1============================\n");
         if (rx_buf[0] == 0x01)
         {
-
             GPIO_WriteReverse(GPIOC, GPIO_PIN_7);
             UART1_SendData8(rx_buf[0]);
         }
@@ -103,4 +104,29 @@ void App_Handle(void)
 
         RX_Mode();
     }
+#else
+    if (TimeOutDet_Check(&TimeOut_Para[0]))
+    {
+        TimeOut_Record(&TimeOut_Para[0], 2);
+        if (Mode == 1)
+        {
+            /*这里可以更新要发送的数据*/
+            if (NRF24L01_TxPacket(tmp_buf_Tx) == TX_OK) //发送数据成功
+            {
+                Mode = 0;  //转变为接收模式
+                RX_Mode(); //一旦发送成功则变成接收模式；
+                Debug_Cfg("=========================success1============================\n");
+            }
+        }
+        else
+        {
+            if (NRF24L01_RxPacket(tmp_buf_Rx) == 0) //一旦接收成功则变成发送模式；
+            {
+                Mode = 1;
+                TX_Mode();
+                Debug_Cfg("=========================success2============================\n");
+            }
+        }
+    }
+#endif
 }

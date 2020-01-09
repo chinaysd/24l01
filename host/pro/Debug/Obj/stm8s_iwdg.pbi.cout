@@ -1,22 +1,22 @@
-"C:\Users\Administrator\Desktop\24l01\software\lib\STM8S_StdPeriph_Driver\src\stm8s_iwdg.c"
+"F:\24l01\host\lib\STM8S_StdPeriph_Driver\src\stm8s_iwdg.c"
 -std=c99
 -ferror-limit=100
 -I
-C:\Users\Administrator\Desktop\24l01\software\pro\..\app
+F:\24l01\host\pro\..\app
 -I
-C:\Users\Administrator\Desktop\24l01\software\pro\..\bsp
+F:\24l01\host\pro\..\bsp
 -I
-C:\Users\Administrator\Desktop\24l01\software\pro\..\lib\STM8S_StdPeriph_Driver\inc
+F:\24l01\host\pro\..\lib\STM8S_StdPeriph_Driver\inc
 -I
 D:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\stm8\inc
 -I
 D:\Program Files (x86)\IAR Systems\Embedded Workbench 7.3\stm8\inc\c
 -I
-C:\Users\Administrator\Desktop\24l01\software\app
+F:\24l01\host\app
 -I
-C:\Users\Administrator\Desktop\24l01\software\bsp
+F:\24l01\host\bsp
 -I
-C:\Users\Administrator\Desktop\24l01\software\lib\STM8S_StdPeriph_Driver\inc
+F:\24l01\host\lib\STM8S_StdPeriph_Driver\inc
 -DSTM8S103=1
 -DUSE_STDPERIPH_DRIVER=1
 -D__CHAR_BITS__=8

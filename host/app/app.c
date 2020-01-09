@@ -1,8 +1,7 @@
 #include "app.h"
+#include "stdarg.h"
 
 TIMEOUT_PARA TimeOut_Para[2];
-uint8_t data_receive_buf[10] = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x00};
-u8 rx_buf[10]; // 接收数据变量,数据一次最大只能发32个字节
 
 void Debug_Cfg(uint8_t *u_buf)
 {
@@ -58,11 +57,11 @@ void App_Init(void)
     Uart_Init();
     // GPIO_Init(GPIOD, GPIO_PIN_5, GPIO_MODE_OUT_PP_HIGH_FAST);
     Init_NRF24L01();
+    TX_Mode();
     enableInterrupts();
     if (NRF24L01_Check())
     {
         GPIO_WriteLow(GPIOC, GPIO_PIN_7);
-        // Debug_Cfg("\n=======================================================\n");
         // Debug_Cfg("===================  Si24R1 Tx TEST  ===============\n");
         // Debug_Cfg("===================        NO ACK       ===============\n");
         // Debug_Cfg("=======================================================\n");
@@ -78,29 +77,52 @@ void delay_ms(uint16_t time)
             ;
     }
 }
+#define Max 2                      //接收或发送失败后重试的最大次数
+u8 Tx_Cnt = 0;                     //发送次数计数
+u8 Rx_Cnt = 0;                     //接收次数计数
+u8 Mode = 1;                       //Mode为1表示发送模式，0表示接收模式
+u8 tmp_buf_Tx[32], tmp_buf_Rx[32]; //发送接收缓冲数组
 
 void App_Handle(void)
 {
     if (TimeOutDet_Check(&TimeOut_Para[0]))
     {
         TimeOut_Record(&TimeOut_Para[0], 2);
-        TX_Mode();
-        if (NRF24L01_TxPacket(data_receive_buf) == TX_OK) //发送完成
+        if (Mode == 1) //发送模式下
         {
-            Debug_Cfg("=========================success============================\n");
-            // printf("发送数据：%s\r\n", data_receive_buf);
+            if (NRF24L01_TxPacket(tmp_buf_Tx) == TX_OK)
+            {
+                Tx_Cnt = 0;
+                Mode = 0;
+                RX_Mode(); //一旦发送成功则变成接收模式；
+                Debug_Cfg("===================  Si24R1 Tx TEST1  ===============\n");
+            }
+            Tx_Cnt++;
+            if (Tx_Cnt == Max) //如果连续发送Max次都失败，则切换为接收模式
+            {
+                Tx_Cnt = 0;
+                Mode = 0;
+                RX_Mode();
+                Debug_Cfg("===================  Si24R1 Tx TEST2  ===============\n");
+            }
         }
-        else //发送失败
+        else //接收模式下
         {
-            // printf("请确认接收端是否正常\r\n");
-            Debug_Cfg("=========================error============================\n");
-            delay_ms(1000);
+            if (NRF24L01_RxPacket(tmp_buf_Rx) == 0) //一旦接收成功则变成发送模式；
+            {
+                Debug_Cfg("===================  Si24R1 Tx TEST3  ===============\n");
+                Rx_Cnt = 0;
+                Mode = 1;
+                TX_Mode();
+            }
+            Rx_Cnt++;
+            if (Rx_Cnt == Max) //如果连续接收Max次都失败，则切换为发送模式
+            {
+                Debug_Cfg("===================  Si24R1 Tx TEST4  ===============\n");
+                Rx_Cnt = 0;
+                Mode = 1;
+                TX_Mode();
+            }
         }
-    }
-    RX_Mode();
-    if (NRF24L01_RxPacket(rx_buf) == 0) //一旦接收到信息,则显示出来.
-    {
-        Debug_Cfg("===================  Si24R1 Tx TEST  ===============\n");
-        // printf("\r\n接收到数据为:%02x", rx_buf[i]);
     }
 }
