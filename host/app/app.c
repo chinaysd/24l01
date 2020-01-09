@@ -90,6 +90,11 @@ void App_Handle(void)
         TimeOut_Record(&TimeOut_Para[0], 2);
         if (Mode == 1) //发送模式下
         {
+            tmp_buf_Tx[0] = 0xa5;
+            tmp_buf_Tx[1] = 0x01;
+            tmp_buf_Tx[2] = 0x02;
+            tmp_buf_Tx[3] = (uint8_t)(tmp_buf_Tx[0] + tmp_buf_Tx[1] + tmp_buf_Tx[2]);
+            tmp_buf_Tx[4] = 0xfb;
             if (NRF24L01_TxPacket(tmp_buf_Tx) == TX_OK)
             {
                 Tx_Cnt = 0;
@@ -114,6 +119,19 @@ void App_Handle(void)
                 Rx_Cnt = 0;
                 Mode = 1;
                 TX_Mode();
+                if (tmp_buf_Rx[0] != 0xa5)
+                {
+                    return;
+                }
+                if (tmp_buf_Rx[4] != 0xfb)
+                {
+                    return;
+                }
+                if (tmp_buf_Rx[1] == 0x01)
+                {
+                    // GPIO_WriteReverse(GPIOC, GPIO_PIN_7);
+                    Debug_Cfg("===================  Si24R1 Tx TEST5  ===============\n");
+                }
             }
             Rx_Cnt++;
             if (Rx_Cnt == Max) //如果连续接收Max次都失败，则切换为发送模式

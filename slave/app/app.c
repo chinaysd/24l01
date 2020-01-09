@@ -111,6 +111,11 @@ void App_Handle(void)
         if (Mode == 1)
         {
             /*这里可以更新要发送的数据*/
+            tmp_buf_Tx[0] = 0xa5;
+            tmp_buf_Tx[1] = 0x01;
+            tmp_buf_Tx[2] = 0x02;
+            tmp_buf_Tx[3] = (uint8_t)(tmp_buf_Tx[0] + tmp_buf_Tx[1] + tmp_buf_Tx[2]);
+            tmp_buf_Tx[4] = 0xfb;
             if (NRF24L01_TxPacket(tmp_buf_Tx) == TX_OK) //发送数据成功
             {
                 Mode = 0;  //转变为接收模式
@@ -125,6 +130,18 @@ void App_Handle(void)
                 Mode = 1;
                 TX_Mode();
                 Debug_Cfg("=========================success2============================\n");
+                if (tmp_buf_Tx[0] != 0xa5)
+                {
+                    return;
+                }
+                if (tmp_buf_Tx[4] != 0xfb)
+                {
+                    return;
+                }
+                if (tmp_buf_Tx[1] == 0x01)
+                {
+                    Debug_Cfg("=========================success3============================\n");
+                }
             }
         }
     }
