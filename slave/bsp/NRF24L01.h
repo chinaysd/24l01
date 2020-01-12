@@ -107,5 +107,5 @@ u8 NRF24L01_Write_Reg(u8 regaddr, u8 data);              //写寄存器
 u8 NRF24L01_Check(void);                                 //检查NRF24L01是否在位
 u8 NRF24L01_TxPacket(u8 *txbuf);                         //发送一个包的数据
 u8 NRF24L01_RxPacket(u8 *rxbuf);                         //接收一个包的数据
-
+void Channal_Change(u8 num);
 #endif

@@ -2,6 +2,7 @@
 #include "stdarg.h"
 
 TIMEOUT_PARA TimeOut_Para[2];
+u8 channal_buf[6] = {10, 30, 40, 60, 80, 100}; // 跳频频道
 
 void Debug_Cfg(uint8_t *u_buf)
 {
@@ -52,6 +53,7 @@ void App_Init(void)
     CLK_SYSCLKConfig(CLK_PRESCALER_HSIDIV1);
     TimeOutDet_Init();
     GPIO_Init(GPIOB, GPIO_PIN_4, GPIO_MODE_IN_PU_NO_IT);
+    GPIO_Init(GPIOB, GPIO_PIN_5, GPIO_MODE_IN_PU_NO_IT);
     GPIO_Init(GPIOC, GPIO_PIN_7, GPIO_MODE_OUT_PP_HIGH_FAST);
     Timer_Init();
     Uart_Init();
@@ -85,9 +87,18 @@ u8 tmp_buf_Tx[32], tmp_buf_Rx[32]; //发送接收缓冲数组
 
 void App_Handle(void)
 {
-    if (TimeOutDet_Check(&TimeOut_Para[0]))
+    static uint8_t j, i;
+    if (GPIO_ReadInputPin(GPIOB, GPIO_PIN_4) == 0)
     {
-        TimeOut_Record(&TimeOut_Para[0], 2);
+        Channal_Change(10);
+    }
+    if (GPIO_ReadInputPin(GPIOB, GPIO_PIN_5) == 0)
+    {
+        Channal_Change(30);
+    }
+    // if (TimeOutDet_Check(&TimeOut_Para[0]))
+    {
+        // TimeOut_Record(&TimeOut_Para[0], 20);
         if (Mode == 1) //发送模式下
         {
             tmp_buf_Tx[0] = 0xa5;
@@ -101,14 +112,18 @@ void App_Handle(void)
                 Mode = 0;
                 RX_Mode(); //一旦发送成功则变成接收模式；
                 Debug_Cfg("===================  Si24R1 Tx TEST1  ===============\n");
+                // delay_ms(5);
+                // GPIO_WriteHigh(GPIOC, GPIO_PIN_7);
             }
+
             Tx_Cnt++;
             if (Tx_Cnt == Max) //如果连续发送Max次都失败，则切换为接收模式
             {
                 Tx_Cnt = 0;
                 Mode = 0;
                 RX_Mode();
-                Debug_Cfg("===================  Si24R1 Tx TEST2  ===============\n");
+                // Debug_Cfg("===================  Si24R1 Tx TEST2  ===============\n");
+                // delay_ms(20);
             }
         }
         else //接收模式下
@@ -116,9 +131,11 @@ void App_Handle(void)
             if (NRF24L01_RxPacket(tmp_buf_Rx) == 0) //一旦接收成功则变成发送模式；
             {
                 Debug_Cfg("===================  Si24R1 Tx TEST3  ===============\n");
+                // GPIO_WriteLow(GPIOC, GPIO_PIN_7);
                 Rx_Cnt = 0;
                 Mode = 1;
                 TX_Mode();
+                // delay_ms(5);
                 if (tmp_buf_Rx[0] != 0xa5)
                 {
                     return;
@@ -130,17 +147,27 @@ void App_Handle(void)
                 if (tmp_buf_Rx[1] == 0x01)
                 {
                     // GPIO_WriteReverse(GPIOC, GPIO_PIN_7);
-                    Debug_Cfg("===================  Si24R1 Tx TEST5  ===============\n");
+                    // Debug_Cfg("===================  Si24R1 Tx TEST5  ===============\n");
                 }
             }
             Rx_Cnt++;
             if (Rx_Cnt == Max) //如果连续接收Max次都失败，则切换为发送模式
             {
-                Debug_Cfg("===================  Si24R1 Tx TEST4  ===============\n");
+                // delay_ms(20);
+                // Debug_Cfg("===================  Si24R1 Tx TEST4  ===============\n");
                 Rx_Cnt = 0;
                 Mode = 1;
                 TX_Mode();
             }
         }
     }
+    // if (TimeOutDet_Check(&TimeOut_Para[0]))
+    // {
+    //     TimeOut_Record(&TimeOut_Para[0], 2);
+    //     Channal_Change(channal_buf[j++]);
+    //     if (j > 5)
+    //     {
+    //         j = 0;
+    //     }
+    // }
 }

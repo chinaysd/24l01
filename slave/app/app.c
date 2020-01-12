@@ -4,6 +4,7 @@ TIMEOUT_PARA TimeOut_Para[2];
 // uint8_t data_receive_buf[10];
 // u8 rx_buf[10]; // 接收数据变量,数据一次最大只能发32个字节
 // u8 tx_buf[10];
+u8 channal_buf[6] = {10, 30, 40, 60, 80, 100}; // 跳频频道
 
 void Debug_Cfg(uint8_t *u_buf)
 {
@@ -82,6 +83,7 @@ u8 Mode = 0;                       //模式标志设置为0 接收端
 u8 tmp_buf_Tx[32], tmp_buf_Rx[32]; //发送接收缓冲数组
 void App_Handle(void)
 {
+    static uint8_t j;
 #if 0
     if (NRF24L01_RxPacket(rx_buf) == 0) //一旦接收到信息,则显示出来.
     {
@@ -105,9 +107,9 @@ void App_Handle(void)
         RX_Mode();
     }
 #else
-    if (TimeOutDet_Check(&TimeOut_Para[0]))
+    // if (TimeOutDet_Check(&TimeOut_Para[0]))
     {
-        TimeOut_Record(&TimeOut_Para[0], 2);
+        // TimeOut_Record(&TimeOut_Para[0], 20);
         if (Mode == 1)
         {
             /*这里可以更新要发送的数据*/
@@ -145,5 +147,14 @@ void App_Handle(void)
             }
         }
     }
+    // if (TimeOutDet_Check(&TimeOut_Para[0]))
+    // {
+    //     TimeOut_Record(&TimeOut_Para[0], 12);
+    //     Channal_Change(channal_buf[j++]);
+    //     if (j > 5)
+    //     {
+    //         j = 0;
+    //     }
+    // }
 #endif
 }
