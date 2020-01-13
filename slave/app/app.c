@@ -4,6 +4,7 @@ TIMEOUT_PARA TimeOut_Para[2];
 u8 Mode = 0;                                   //模式标志设置为0 接收端
 u8 tmp_buf_Tx[5], tmp_buf_Rx[5];               //发送接收缓冲数组
 u8 channal_buf[6] = {10, 30, 40, 60, 80, 100}; // 跳频频道
+uint8_t t;
 
 void Debug_Cfg(uint8_t *u_buf)
 {
@@ -49,25 +50,23 @@ static void Uart_Init(void)
     UART1_Cmd(ENABLE);
 }
 
-void delay_ms(uint16_t time)
-{
-    static uint16_t i, j;
-    for (i = time; i > 0; i--)
-    {
-        for (j = 200; j > 0; j--)
-            ;
-    }
-}
+// void delay_ms(uint16_t time)
+// {
+//     static uint16_t i, j;
+//     for (i = time; i > 0; i--)
+//     {
+//         for (j = 200; j > 0; j--)
+//             ;
+//     }
+// }
 
 void App_Init(void)
 {
     CLK_SYSCLKConfig(CLK_PRESCALER_HSIDIV1);
     TimeOutDet_Init();
     GPIO_Init(GPIOB, GPIO_PIN_4, GPIO_MODE_IN_PU_NO_IT);
-    GPIO_Init(GPIOC, GPIO_PIN_7, GPIO_MODE_OUT_PP_HIGH_FAST);
     Timer_Init();
     Uart_Init();
-    // GPIO_Init(GPIOD, GPIO_PIN_5, GPIO_MODE_OUT_PP_HIGH_FAST);
     Init_NRF24L01();
     enableInterrupts();
     while (NRF24L01_Check()) //检测不到NRF24L01
@@ -77,6 +76,24 @@ void App_Init(void)
     }
     //接收模式
     RX_Mode();
+
+    OLED_Init();
+    OLED_Clear();
+    OLED_ShowString(30, 0, "EMOMO TEST");
+    OLED_ShowString(8, 2, "ZHONGJINGYUAN");
+    OLED_ShowString(20, 4, "2020/01/13");
+    OLED_ShowString(0, 6, "ASCII:");
+    OLED_ShowString(63, 6, "CODE:");
+    t = ' ';
+    OLED_ShowCHinese(0, 0, 0);
+    OLED_ShowCHinese(18, 0, 1);
+    OLED_ShowCHinese(36, 0, 2);
+    OLED_ShowCHinese(54, 0, 3);
+    OLED_ShowCHinese(72, 0, 4);
+    OLED_ShowCHinese(90, 0, 5);
+    OLED_ShowCHinese(108, 0, 6);
+
+    t = ' ';
 }
 
 void App_Handle(void)
@@ -127,4 +144,22 @@ void App_Handle(void)
     //         j = 0;
     //     }
     // }
+
+    OLED_ShowCHinese(0, 0, 0);
+    OLED_ShowCHinese(18, 0, 1);
+    OLED_ShowCHinese(36, 0, 2);
+    OLED_ShowCHinese(54, 0, 3);
+    OLED_ShowCHinese(72, 0, 4);
+    OLED_ShowCHinese(90, 0, 5);
+    OLED_ShowCHinese(108, 0, 6);
+    OLED_ShowString(0, 2, "EMOMO WELCOM U");
+    // OLED_ShowString(8,2,"ZHONGJINGYUAN");
+    OLED_ShowString(20, 4, "2020/01/13");
+    OLED_ShowString(0, 6, "ASCII:");
+    OLED_ShowString(63, 6, "CODE:");
+    OLED_ShowChar(48, 6, t);
+    t++;
+    if (t > '~')
+        t = ' ';
+    OLED_ShowNum(103, 6, t, 3, 16);
 }

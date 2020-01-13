@@ -6,6 +6,7 @@
 #include "stdio.h"
 #include "NRF24L01.h"
 #include "string.h"
+#include "oled.h"
 
 typedef enum
 {

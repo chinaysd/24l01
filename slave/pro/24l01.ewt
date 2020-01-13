@@ -1958,6 +1958,9 @@
       <name>$PROJ_DIR$\..\bsp\NRF24L01.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\..\bsp\oled.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\bsp\TimeOut.c</name>
     </file>
   </group>
