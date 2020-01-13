@@ -1,0 +1,29 @@
+#ifndef BSP_KEY_H_
+#define BSP_KEY_H_
+
+#define KEY_SCAN_TIME 10
+#define KEY_JITTER_TIME 10
+#define KEY_CP_TIME 500
+#define KEY_CPH_TIME 200
+
+typedef enum
+{
+	MSG_KEY_NONE = 0,
+	MSG_K1_PRESS,
+	MSG_K1_SHORT_PRESS,
+	MSG_K1_LONGPRESS,
+	MSG_K1_LONGPRESS_HD,
+	MSG_K1_LONGPRESS_RE,
+	MSG_K2_PRESS,
+	MSG_K2_SHORT_PRESS,
+	MSG_K2_LONGPRESS,
+	MSG_K2_LONGPRESS_HD,
+	MSG_K2_LONGPRESS_RE,
+	MSG_INVALID = 0XFF
+} key_msg_t;
+
+void Bsp_Key_Init(void);
+
+key_msg_t Bsp_Key_Scan(void);
+
+#endif

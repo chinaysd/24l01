@@ -1,9 +1,8 @@
 #include "app.h"
 
 TIMEOUT_PARA TimeOut_Para[2];
-// uint8_t data_receive_buf[10];
-// u8 rx_buf[10]; // 接收数据变量,数据一次最大只能发32个字节
-// u8 tx_buf[10];
+u8 Mode = 0;                                   //模式标志设置为0 接收端
+u8 tmp_buf_Tx[5], tmp_buf_Rx[5];               //发送接收缓冲数组
 u8 channal_buf[6] = {10, 30, 40, 60, 80, 100}; // 跳频频道
 
 void Debug_Cfg(uint8_t *u_buf)
@@ -79,71 +78,43 @@ void App_Init(void)
     //接收模式
     RX_Mode();
 }
-u8 Mode = 0;                       //模式标志设置为0 接收端
-u8 tmp_buf_Tx[32], tmp_buf_Rx[32]; //发送接收缓冲数组
+
 void App_Handle(void)
 {
     static uint8_t j;
-#if 0
-    if (NRF24L01_RxPacket(rx_buf) == 0) //一旦接收到信息,则显示出来.
+    if (Mode == 1)
     {
-        // printf("\r\n接收到数据为:%s", rx_buf);
-        Debug_Cfg("=========================success1============================\n");
-        if (rx_buf[0] == 0x01)
+        /*这里可以更新要发送的数据*/
+        tmp_buf_Tx[0] = 0xa5;
+        tmp_buf_Tx[1] = 0x01;
+        tmp_buf_Tx[2] = 0x02;
+        tmp_buf_Tx[3] = (uint8_t)(tmp_buf_Tx[0] + tmp_buf_Tx[1] + tmp_buf_Tx[2]);
+        tmp_buf_Tx[4] = 0xfb;
+        if (NRF24L01_TxPacket(tmp_buf_Tx) == TX_OK) //发送数据成功
         {
-            GPIO_WriteReverse(GPIOC, GPIO_PIN_7);
-            UART1_SendData8(rx_buf[0]);
+            Mode = 0;  //转变为接收模式
+            RX_Mode(); //一旦发送成功则变成接收模式；
+            Debug_Cfg("=========================success1============================\n");
         }
-        memcpy(tx_buf, rx_buf, 10);
-        // delay_ms(250);
-        //发送模式
-        TX_Mode();
-        if (NRF24L01_TxPacket(tx_buf) == TX_OK) //发送完成
-        {
-            // printf("发送数据：%s\r\n", tx_buf);
-            Debug_Cfg("=========================success2============================\n");
-        }
-
-        RX_Mode();
     }
-#else
-    // if (TimeOutDet_Check(&TimeOut_Para[0]))
+    else
     {
-        // TimeOut_Record(&TimeOut_Para[0], 20);
-        if (Mode == 1)
+        if (NRF24L01_RxPacket(tmp_buf_Rx) == 0) //一旦接收成功则变成发送模式；
         {
-            /*这里可以更新要发送的数据*/
-            tmp_buf_Tx[0] = 0xa5;
-            tmp_buf_Tx[1] = 0x01;
-            tmp_buf_Tx[2] = 0x02;
-            tmp_buf_Tx[3] = (uint8_t)(tmp_buf_Tx[0] + tmp_buf_Tx[1] + tmp_buf_Tx[2]);
-            tmp_buf_Tx[4] = 0xfb;
-            if (NRF24L01_TxPacket(tmp_buf_Tx) == TX_OK) //发送数据成功
+            Mode = 1;
+            TX_Mode();
+            Debug_Cfg("=========================success2============================\n");
+            if (tmp_buf_Tx[0] != 0xa5)
             {
-                Mode = 0;  //转变为接收模式
-                RX_Mode(); //一旦发送成功则变成接收模式；
-                Debug_Cfg("=========================success1============================\n");
+                return;
             }
-        }
-        else
-        {
-            if (NRF24L01_RxPacket(tmp_buf_Rx) == 0) //一旦接收成功则变成发送模式；
+            if (tmp_buf_Tx[4] != 0xfb)
             {
-                Mode = 1;
-                TX_Mode();
-                Debug_Cfg("=========================success2============================\n");
-                if (tmp_buf_Tx[0] != 0xa5)
-                {
-                    return;
-                }
-                if (tmp_buf_Tx[4] != 0xfb)
-                {
-                    return;
-                }
-                if (tmp_buf_Tx[1] == 0x01)
-                {
-                    Debug_Cfg("=========================success3============================\n");
-                }
+                return;
+            }
+            if (tmp_buf_Tx[1] == 0x01)
+            {
+                Debug_Cfg("=========================success3============================\n");
             }
         }
     }
@@ -156,5 +127,4 @@ void App_Handle(void)
     //         j = 0;
     //     }
     // }
-#endif
 }

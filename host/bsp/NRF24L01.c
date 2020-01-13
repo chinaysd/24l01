@@ -3,7 +3,7 @@
 u8 TX_ADDRESS[TX_ADR_WIDTH] = {0x34, 0x43, 0x10, 0x10, 0x01}; //发送地址
 u8 RX_ADDRESS[RX_ADR_WIDTH] = {0x34, 0x43, 0x10, 0x10, 0x01}; //发送地址
 
-uint8_t channal;
+uint8_t channal = 30;
 
 //初始化NRF24L01IO口
 //CE->PD8,CSN->PD9,SCK->PD10,MOSI->PD11,MISO->PD12,IRQ->PD13

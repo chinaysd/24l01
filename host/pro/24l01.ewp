@@ -1606,7 +1606,13 @@
   <group>
     <name>bsp</name>
     <file>
+      <name>$PROJ_DIR$\..\bsp\bsp_key.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\..\bsp\NRF24L01.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\bsp\port_key.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\..\bsp\TimeOut.c</name>
